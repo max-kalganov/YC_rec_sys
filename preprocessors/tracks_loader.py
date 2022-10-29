@@ -4,6 +4,8 @@ from typing import List, Optional
 import yandex_music as ym
 from pydub import AudioSegment
 
+from preprocessors.utils import get_track_file_path
+
 logger = logging.getLogger()
 
 
@@ -15,11 +17,6 @@ class WAVTracksLoader:
     def __init__(self, tracks_ids: List[str], tracks_root_folder: str) -> None:
         self.tracks_ids = tracks_ids
         self.tracks_root_folder = tracks_root_folder
-
-    def get_track_file_path(self, track_id: str, postfix: str = None):
-        postfix = f"_{postfix}" if postfix else ""
-        file_name = f"{track_id}{postfix}.wav"
-        return os.path.join(self.tracks_root_folder, file_name)
 
     def download_track(self, yandex_client: ym.Client, track_id: str, track_output_file: str) -> None:
             tempo_filepath = "data/tempo.mp3"
@@ -40,7 +37,9 @@ class WAVTracksLoader:
         client.init()
 
         for track_id in self.tracks_ids:
-            track_output_file = self.get_track_file_path(track_id, postfix)
+            track_output_file = get_track_file_path(track_id=track_id,
+                                                    postfix=postfix,
+                                                    track_root_folder=self.tracks_root_folder)
             if not os.path.exists(track_output_file):
                 logger.info(f"Loading track with id = {track_id} into {track_output_file}")
                 self.download_track(yandex_client=client, track_id=track_id, track_output_file=track_output_file)

@@ -38,8 +38,8 @@ class TracksPreprocessor:
             self,
             tracks_ids: List[str],
             tracks_download_info: List[ym.DownloadInfo],
-            tracks_postfix: str,
             tracks_root_folder: str,
+            tracks_postfix: str = "",
             batch_size: Optional[int] = None
     ) -> Iterable[np.ndarray]:
         assert batch_size is None or batch_size >= 1, f"incorrect batch size = {batch_size}"

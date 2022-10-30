@@ -30,25 +30,9 @@ def get_predictions(train_users_tracks: List[Set[str]], train_100_popular_tracks
             t1 = time.time()
             current_test_user_tracks = set(line.strip().split(' '))
             t2 = time.time()
-
-
-            top3_nearest_train_users = [0, 1, 2]
-            max_intersec = [0, 0, 0]
-            maxminval = 0
-            maxminpos = 2
-            for track_ind, tracks in enumerate(train_users_tracks[3:]):
-                intersec_len = len(current_test_user_tracks.intersection(tracks))
-                if intersec_len > maxminval:
-                    max_intersec.pop(maxminpos)
-                    top3_nearest_train_users.pop(maxminpos)
-
-                    max_intersec.append(intersec_len)
-                    top3_nearest_train_users.append(track_ind + 3)
-
-                    maxminval = min(max_intersec)
-                    maxminpos = max_intersec.index(maxminval)
-
-            top3_nearest_train_users = [train_users_tracks[t_ind] for t_ind in top3_nearest_train_users]
+            top3_nearest_train_users = sorted(train_users_tracks,
+                                              key=lambda tracks: len(current_test_user_tracks.intersection(tracks)),
+                                              reverse=True)[:3]
             t3 = time.time()
             new_top3_users_tracks = Counter()
             for nearest_user in top3_nearest_train_users:

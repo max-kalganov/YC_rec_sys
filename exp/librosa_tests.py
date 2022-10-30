@@ -8,12 +8,12 @@ def librosa_example():
     # 1. Get the file path to an included audio example
     filename = librosa.example('nutcracker')
 
-    sound = AudioSegment.from_mp3('data/tracks/21451.mp3')
+    sound = AudioSegment.from_mp3('../data/tracks/21451.mp3')
     sound.export('data/tracks/21451.wav', format="wav")
 
     # 2. Load the audio as a waveform `y`
     #    Store the sampling rate as `sr`
-    y, sr = librosa.load('data/tracks/21451.wav')
+    y, sr = librosa.load('../data/tracks/21451.wav')
 
     # 3. Run the default beat tracker
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
@@ -26,7 +26,7 @@ def librosa_example():
 
 def librosa_example_2():
 
-    y, sr = librosa.load('data/tracks/21451.wav')
+    y, sr = librosa.load('../data/tracks/21451.wav')
     hop_length = 512
 
     y_harmonic, y_percussive = librosa.effects.hpss(y)
@@ -41,7 +41,7 @@ def librosa_example_2():
 
 
 def librosa_example_3():
-    y, sr = librosa.load('data/tracks/21451.wav')
+    y, sr = librosa.load('../data/tracks/21451.wav')
 
     for i in range(30, 33, 1):
         y_h, y_p = librosa.effects.hpss(y, margin=i)

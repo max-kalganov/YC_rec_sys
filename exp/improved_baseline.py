@@ -89,18 +89,18 @@ def get_test_results(test, track_count, global_track_score, popular_tracks_list)
     return result
 
 
-def write_results(result):
+def write_results(result, filename: str):
     print("dump results")
-    with open('../data/results/improved_baseline_result', 'w') as f:
+    with open(f'../data/results/{filename}', 'w') as f:
         f.writelines(result)
 
 
 if __name__ == '__main__':
-    track_stats = aggregate_track_stats()
+    train_track_stats = aggregate_track_stats()
 
-    train_popular_tracks_list = get_popular_tracks(track_stats)
-    top_tracks_set = get_top_tracks(track_stats)
-    global_track_score = get_global_track_score(track_stats)
+    train_popular_tracks_list = get_popular_tracks(train_track_stats)
+    top_tracks_set = get_top_tracks(train_track_stats)
+    global_track_score = get_global_track_score(train_track_stats)
 
     track_count = get_filtered_train_track_count(top_tracks_set)
     test = download_test_data()

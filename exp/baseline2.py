@@ -1,7 +1,8 @@
 import time
-from collections import Counter
+from collections import Counter, defaultdict
 from tqdm import tqdm
-from typing import Set, List
+from typing import Set, List, Dict
+from heapq import nlargest
 
 from exp.improved_baseline import aggregate_track_stats, get_popular_tracks, write_results
 
@@ -15,34 +16,36 @@ def store_all_users_tracks():
     return users_tracks
 
 
+def get_tracks_to_users_map(all_users_tracks: List[Set[str]]) -> Dict[str, Set[str]]:
+    tracks_to_users = defaultdict(set)
+    for i, user_tracks in enumerate(all_users_tracks):
+        for track in user_tracks:
+            tracks_to_users[track].add(i)
+    return tracks_to_users
+
+
 def get_predictions(train_users_tracks: List[Set[str]], train_100_popular_tracks,
-                    selected_lines_from: int, selected_lines_to: int, n_most_common: int = 20):
+                    tracks_to_users_map: Dict[str, Set[str]], n_most_common_tracks: int = 20):
     results = []
     with open('../data/likes_data/test') as f:
         lines = f.readlines()
-        t21f = 0
-        t32f = 0
-        t43f = 0
-        t54f = 0
-        t65f = 0
 
-        for line in tqdm(lines[selected_lines_from: selected_lines_to]):
-            t1 = time.time()
+        for line in tqdm(lines):
             current_test_user_tracks = set(line.strip().split(' '))
-            t2 = time.time()
-            top3_nearest_train_users = sorted(train_users_tracks,
-                                              key=lambda tracks: len(current_test_user_tracks.intersection(tracks)),
-                                              reverse=True)[:3]
-            t3 = time.time()
+
+            nearest_train_users = Counter()
+            for track in current_test_user_tracks:
+                nearest_train_users.update(tracks_to_users_map[track])
+
+            top3_nearest_train_users = [user_id for user_id, _ in nearest_train_users.most_common(3)]
+
             new_top3_users_tracks = Counter()
             for nearest_user in top3_nearest_train_users:
-                new_top3_users_tracks.update(nearest_user - current_test_user_tracks)
+                new_top3_users_tracks.update(train_users_tracks[nearest_user] - current_test_user_tracks)
 
-            t4 = time.time()
-            most_common_tracks = new_top3_users_tracks.most_common(n_most_common)
+            most_common_tracks = new_top3_users_tracks.most_common(n_most_common_tracks)
 
             current_user_result_tracks = [track for track, _ in most_common_tracks]
-            t5 = time.time()
             most_common_tracks_set = set(current_user_result_tracks)
 
             for pop_track in train_100_popular_tracks:
@@ -50,15 +53,8 @@ def get_predictions(train_users_tracks: List[Set[str]], train_100_popular_tracks
                     current_user_result_tracks.append(pop_track)
                 else:
                     break
-            t6 = time.time()
-            t21f += t2 - t1
-            t32f += t3 - t2
-            t43f += t4 - t3
-            t54f += t5 - t4
-            t65f += t6 - t5
 
             results.append(' '.join(current_user_result_tracks) + '\n')
-    print(f"Time: {t21f}, {t32f}, {t43f}, {t54f}, {t65f}")
 
     return results
 
@@ -70,11 +66,13 @@ def run_baseline2():
     t2 = time.time()
     print("Time: ", t2 - t1)
     train_users_tracks = store_all_users_tracks()
+    tracks_to_users_map = get_tracks_to_users_map(train_users_tracks)
     t3 = time.time()
     print("Time: ", t3 - t2)
     results = get_predictions(train_users_tracks, train_100_popular_tracks,
-                              selected_lines_from=0, selected_lines_to=100)
-    write_results(results, "improved_baseline_result_0_100")
+                              tracks_to_users_map, n_most_common_tracks=5)
+    write_results(results, "improved_baseline_result_5_most_common")
+
     t4 = time.time()
     print(t4 - t3)
 

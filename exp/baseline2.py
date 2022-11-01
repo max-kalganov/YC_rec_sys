@@ -25,7 +25,8 @@ def get_tracks_to_users_map(all_users_tracks: List[Set[str]]) -> Dict[str, Set[s
 
 
 def get_predictions(train_users_tracks: List[Set[str]], train_100_popular_tracks,
-                    tracks_to_users_map: Dict[str, Set[str]], n_most_common_tracks: int = 20):
+                    tracks_to_users_map: Dict[str, Set[str]], n_most_common_tracks: int = 20,
+                    n_most_common_nearest_users: int = 3):
     results = []
     with open('../data/likes_data/test') as f:
         lines = f.readlines()
@@ -37,7 +38,7 @@ def get_predictions(train_users_tracks: List[Set[str]], train_100_popular_tracks
             for track in current_test_user_tracks:
                 nearest_train_users.update(tracks_to_users_map[track])
 
-            top3_nearest_train_users = [user_id for user_id, _ in nearest_train_users.most_common(3)]
+            top3_nearest_train_users = [user_id for user_id, _ in nearest_train_users.most_common(n_most_common_nearest_users)]
 
             new_top3_users_tracks = Counter()
             for nearest_user in top3_nearest_train_users:
@@ -70,8 +71,8 @@ def run_baseline2():
     t3 = time.time()
     print("Time: ", t3 - t2)
     results = get_predictions(train_users_tracks, train_100_popular_tracks,
-                              tracks_to_users_map, n_most_common_tracks=5)
-    write_results(results, "improved_baseline_result_5_most_common")
+                              tracks_to_users_map, n_most_common_tracks=20, n_most_common_nearest_users=10)
+    write_results(results, "improved_baseline_result_20_most_common_10_nearest_users")
 
     t4 = time.time()
     print(t4 - t3)

@@ -1,0 +1,8 @@
+run_tracks_preload_features.tracks_root_folder = "data/tracks"
+
+get_train_val_tracks_ids.input_file_path = "data/likes_data/train"
+get_train_val_tracks_ids.train_val_split = 0.8
+
+get_test_tracks_ids.input_file_path = "data/likes_data/test"
+
+TracksFeatureExtractors.feature_extractors = []

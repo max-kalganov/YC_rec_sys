@@ -9,7 +9,6 @@ from preprocessors.tracks_feature_extractors import TracksFeatureExtractors
 from preprocessors.utils import get_train_val_tracks_ids, get_test_tracks_ids
 
 
-@gin.configurable
 def dump_a_subset(subset_track_ids: List[List[str]],
                   tracks_root_folder: str,
                   wav_subset_folder: str,
@@ -44,4 +43,5 @@ def run_tracks_preload_features(tracks_root_folder: str):
 
 
 if __name__ == '__main__':
+    gin.parse_config_file('configs/fe_preloader_config.gin')
     run_tracks_preload_features()

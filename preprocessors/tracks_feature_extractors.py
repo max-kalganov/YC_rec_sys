@@ -10,6 +10,8 @@ import numpy as np
 
 @gin.configurable
 class TracksFeatureExtractors:
+    """Runs feature extractions for each track composing the results into a single pd.DataFrame"""
+
     feature_extractors: List[FeatureExtractor] = []
 
     def __init__(self, feature_extractors: List[FeatureExtractor]):

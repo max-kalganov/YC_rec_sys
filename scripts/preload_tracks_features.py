@@ -1,10 +1,9 @@
+"""Loads wav files for each track, runs feature extractors for each track storing the results into csv files"""
 import os.path
 
 import gin
-import numpy as np
-from typing import List, Optional
+from typing import List
 
-from preprocessors.batches_aggregator import BatchesComposer
 from preprocessors.tracks_loader import WAVTracksLoader
 from preprocessors.tracks_feature_extractors import TracksFeatureExtractors
 from preprocessors.utils import get_train_val_tracks_ids, get_test_tracks_ids

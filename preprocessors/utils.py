@@ -1,4 +1,5 @@
 import os
+from typing import Tuple, List
 
 import gin
 
@@ -15,9 +16,23 @@ def features_to_numpy():
     pass
 
 
-def get_train_val_tracks_ids():
-    pass
+def load_file_tracks(input_file_path: str) -> List[List[str]]:
+    with open(input_file_path) as f:
+        lines = f.readlines()
+        all_tracks = [user_tracks_str.strip().split(' ') for user_tracks_str in lines]
+    return all_tracks
 
 
-def get_test_tracks_ids():
-    pass
+@gin.configurable
+def get_train_val_tracks_ids(input_file_path: str,
+                             train_val_split: float = 0.7) -> Tuple[List[List[str]], List[List[str]]]:
+    """Returns track ids for train and val"""
+    all_tracks = load_file_tracks(input_file_path)
+    num_of_train_users = int(len(all_tracks) * train_val_split)
+    train_tracks = all_tracks[:num_of_train_users]
+    val_tracks = all_tracks[num_of_train_users:]
+    return train_tracks, val_tracks
+
+
+def get_test_tracks_ids(input_file_path: str) -> List[List[str]]:
+    return load_file_tracks(input_file_path)

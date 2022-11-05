@@ -6,8 +6,6 @@ from pydub import AudioSegment
 
 from preprocessors.utils import get_track_file_path
 
-logger = logging.getLogger()
-
 
 class WAVTracksLoader:
     """Loads tracks from internet and stores in wav format in local storage"""
@@ -24,12 +22,12 @@ class WAVTracksLoader:
         try:
             track_download_info = yandex_client.tracks_download_info(track_id)
             if len(track_download_info) > 1:
-                logger.warning(f"Found {len(track_download_info)} download info for track {track_id}")
+                logging.warning(f"Found {len(track_download_info)} download info for track {track_id}")
             return track_download_info[0]
         except Exception as e:
-            logger.warning(e)
+            logging.warning(e)
             self.__cnt_errors += 1
-            logger.warning(f"Couldn't download download_info for track {track_id} -- cnt {self.__cnt_errors}")
+            logging.warning(f"Couldn't download download_info for track {track_id} -- cnt {self.__cnt_errors}")
         return None
 
     def download_track(self, yandex_client: ym.Client, track_id: str, track_output_file: str) -> None:
@@ -74,10 +72,10 @@ class WAVTracksLoader:
                                                         user_ind=user_ind,
                                                         track_root_folder=self.tracks_root_folder)
                 if not os.path.exists(track_output_file):
-                    logger.info(f"Loading track with id = {track_id} into {track_output_file}")
+                    logging.info(f"Loading track with id = {track_id} into {track_output_file}")
                     self.download_track(yandex_client=client,
                                         track_id=track_id,
                                         track_output_file=track_output_file)
 
                 else:
-                    logger.info(f"Track with id = {track_id} is already loaded in {track_output_file}")
+                    logging.info(f"Track with id = {track_id} is already loaded in {track_output_file}")

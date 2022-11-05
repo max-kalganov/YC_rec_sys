@@ -2,11 +2,13 @@
 import os.path
 
 import gin
+import logging
 from typing import List
 
 from preprocessors.tracks_loader import WAVTracksLoader
 from preprocessors.tracks_feature_extractors import TracksFeatureExtractors
 from preprocessors.utils import get_train_val_tracks_ids, get_test_tracks_ids
+logging.getLogger().setLevel(logging.INFO)
 
 
 def dump_a_subset(subset_track_ids: List[List[str]],
@@ -32,12 +34,15 @@ def dump_a_subset(subset_track_ids: List[List[str]],
 @gin.configurable
 def run_tracks_preload_features(tracks_root_folder: str):
     train_tracks_ids, val_tracks_ids = get_train_val_tracks_ids()
+    logging.info("Processing train dataset...")
     dump_a_subset(subset_track_ids=train_tracks_ids, tracks_root_folder=tracks_root_folder,
                   wav_subset_folder='train_wav', features_subset_filename='train_features.csv')
+    logging.info("Processing val dataset...")
     dump_a_subset(subset_track_ids=val_tracks_ids, tracks_root_folder=tracks_root_folder,
                   wav_subset_folder='val_wav', features_subset_filename='val_features.csv')
 
     test_tracks_ids = get_test_tracks_ids()
+    logging.info("Processing test dataset...")
     dump_a_subset(subset_track_ids=test_tracks_ids, tracks_root_folder=tracks_root_folder,
                   wav_subset_folder='test_wav', features_subset_filename='test_features.csv')
 

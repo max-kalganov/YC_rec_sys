@@ -1,6 +1,8 @@
 import logging
 import os
 from typing import List, Optional
+
+import gin
 import yandex_music as ym
 from pydub import AudioSegment
 from tqdm import tqdm
@@ -8,6 +10,7 @@ from tqdm import tqdm
 from preprocessors.utils import get_track_file_path
 
 
+@gin.configurable
 class WAVTracksLoader:
     """Loads tracks from internet and stores in wav format in local storage"""
     tracks_root_folder: Optional[str] = None

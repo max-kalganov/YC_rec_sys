@@ -3,6 +3,7 @@ import os
 from typing import List, Optional
 import yandex_music as ym
 from pydub import AudioSegment
+from tqdm import tqdm
 
 from preprocessors.utils import get_track_file_path
 
@@ -11,9 +12,10 @@ class WAVTracksLoader:
     """Loads tracks from internet and stores in wav format in local storage"""
     tracks_root_folder: Optional[str] = None
 
-    def __init__(self, tracks_root_folder: str) -> None:
+    def __init__(self, tracks_root_folder: str, api_token: str) -> None:
         self.tracks_root_folder = tracks_root_folder
         self.__cnt_errors = 0
+        self.__api_token = api_token
 
     def __clean_cnt_errors(self):
         self.__cnt_errors = 0
@@ -45,7 +47,7 @@ class WAVTracksLoader:
 
     def get_download_info(self, users_tracks_ids: List[List[str]]) -> List[List[ym.DownloadInfo]]:
         self.__clean_cnt_errors()
-        client = ym.Client()
+        client = ym.Client(token=self.__api_token)
         client.init()
 
         tracks_download_info = []
@@ -63,10 +65,11 @@ class WAVTracksLoader:
         os.makedirs(self.tracks_root_folder, exist_ok=True)
         client = ym.Client()
         client.init()
-
-        for user_ind, single_user_tracks_ids in enumerate(users_tracks_ids):
+        processed_tracks = set()
+        for user_ind, single_user_tracks_ids in enumerate(tqdm(users_tracks_ids)):
             for track_id in single_user_tracks_ids:
-
+                if track_id in processed_tracks:
+                    continue
                 track_output_file = get_track_file_path(track_id=track_id,
                                                         postfix=postfix,
                                                         user_ind=user_ind,
@@ -76,6 +79,4 @@ class WAVTracksLoader:
                     self.download_track(yandex_client=client,
                                         track_id=track_id,
                                         track_output_file=track_output_file)
-
-                else:
-                    logging.info(f"Track with id = {track_id} is already loaded in {track_output_file}")
+                processed_tracks.add(track_id)

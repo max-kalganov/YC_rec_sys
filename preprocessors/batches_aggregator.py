@@ -8,5 +8,5 @@ class BatchesComposer:
         assert batch_size is None or batch_size >= 1, f"incorrect batch size = {batch_size}"
         self.batch_size = batch_size
 
-    def get_batches(self, samples: List) -> Iterable[np.ndarray]:
+    def get_batches(self, samples_generator: Iterable[np.ndarray]) -> Iterable[np.ndarray]:
         pass

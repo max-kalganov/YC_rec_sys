@@ -1,15 +1,21 @@
+import abc
 import random
 from collections import defaultdict
-from typing import List, Iterable, Tuple, Dict, Union, Optional
+from copy import copy
+from itertools import cycle
+from typing import List, Dict, Union, Optional
 
+import gin
 import numpy as np
-from tqdm import tqdm
 
 
-class DatasetGenerator:
-    # TODO: add triples per anchor parameter --- self.triples_per_anchor = triples_per_anchor
+class BaseDatasetGenerator(abc.ABC):
+    def __init__(self, all_tracks: List[int], embedding_size: int):
+        self._all_tracks = copy(all_tracks)
+        random.shuffle(self._all_tracks)
+        self._all_tracks_iterator = cycle(self._all_tracks)
 
-    # UTILS
+        self._embedding_size = embedding_size
 
     @staticmethod
     def _select_not_equal_value(value, seq):
@@ -41,34 +47,39 @@ class DatasetGenerator:
         assert len(current_negative) > 0
         return random.choice(current_negative)
 
-    def _generate_tracks_triples(self,
-                                 group_id_to_tracks: Dict[int, List[int]],
-                                 tracks_to_group_id: Dict[int, Union[int, List[int]]],
-                                 batch_size: int,
-                                 description: str):
-        all_tracks = list(tracks_to_group_id.keys())
-        random.shuffle(all_tracks)
+    def _generate_single_triple(self, anchor_track_id, tracks_to_group_id, group_id_to_tracks):
+        current_anchor = anchor_track_id
+        current_positive = self._get_positive(track_id=anchor_track_id,
+                                              group_id=tracks_to_group_id[anchor_track_id],
+                                              group_id_to_tracks=group_id_to_tracks)
+        current_negative = self._get_negative(group_id=tracks_to_group_id[anchor_track_id],
+                                              group_id_to_tracks=group_id_to_tracks)
+        if current_positive is None:
+            current_anchor = current_negative = None
+        else:
+            current_anchor = int(current_anchor)
+            current_positive = int(current_positive)
+            current_negative = int(current_negative)
 
-        batch_anchors, batch_positives, batch_negatives = [], [], []
-        for anchor_track_id in tqdm(all_tracks, desc=description):
-            current_anchor = anchor_track_id
-            current_positive = self._get_positive(track_id=anchor_track_id,
-                                                  group_id=tracks_to_group_id[anchor_track_id],
-                                                  group_id_to_tracks=group_id_to_tracks)
-            current_negative = self._get_negative(group_id=tracks_to_group_id[anchor_track_id],
-                                                  group_id_to_tracks=group_id_to_tracks)
-            if current_positive is None:
-                continue
-            batch_anchors.append(int(current_anchor))
-            batch_positives.append(int(current_positive))
-            batch_negatives.append(int(current_negative))
-            if len(batch_anchors) == batch_size:
-                yield np.array(batch_anchors), np.array(batch_positives), np.array(batch_negatives)
-                batch_anchors, batch_positives, batch_negatives = [], [], []
+        return current_anchor, current_positive, current_negative
 
-        yield np.array(batch_anchors), np.array(batch_positives), np.array(batch_negatives)
+    def _get_label(self):
+        return np.zeros((1, 3 * self._embedding_size))
 
-    # ARTISTS TRIPLES GENERATION
+    def __iter__(self):
+        return self
+
+    @abc.abstractmethod
+    def __next__(self):
+        pass
+
+
+@gin.configurable
+class ArtistTriplesDatasetGenerator(BaseDatasetGenerator):
+    def __init__(self, tracks_to_artist: Dict[int, int], embedding_size):
+        super().__init__(all_tracks=list(tracks_to_artist.keys()), embedding_size=embedding_size)
+        self._tracks_to_artist = tracks_to_artist
+        self._artists_to_tracks = self._map_artists_to_tracks(tracks_to_artist)
 
     @staticmethod
     def _map_artists_to_tracks(tracks_to_artists: Dict[int, int]) -> Dict[int, List[int]]:
@@ -77,18 +88,30 @@ class DatasetGenerator:
             artists_to_tracks[artist].append(track)
         return dict(artists_to_tracks)  # to remove default behaviour
 
-    def generate_artist_triples(
-            self,
-            tracks_to_artist: Dict[int, int],
-            batch_size: int
-    ) -> Iterable[Tuple[np.ndarray, np.ndarray, np.ndarray]]:
-        artists_to_tracks = self._map_artists_to_tracks(tracks_to_artist)
-        yield from self._generate_tracks_triples(group_id_to_tracks=artists_to_tracks,
-                                                 tracks_to_group_id=tracks_to_artist,
-                                                 batch_size=batch_size,
-                                                 description="Generating artist triples: ")
+    def __next__(self):
+        current_anchor, current_positive, current_negative = None, None, None
+        while current_anchor is None:
+            current_anchor = next(self._all_tracks_iterator)
+            current_anchor, current_positive, current_negative = self._generate_single_triple(
+                anchor_track_id=current_anchor,
+                tracks_to_group_id=self._tracks_to_artist,
+                group_id_to_tracks=self._artists_to_tracks
+            )
 
-    # USERS TRIPLES GENERATION
+        anchor_np = np.array([current_anchor])
+        positive_np = np.array([current_positive])
+        negative_np = np.array([current_negative])
+
+        return [anchor_np, positive_np, negative_np], self._get_label()
+
+
+@gin.configurable
+class UsersTriplesDatasetGenerator(BaseDatasetGenerator):
+    def __init__(self, all_users_tracks: List[List[int]], embedding_size):
+        self._user_to_tracks = self._map_users_to_tracks(all_users_tracks)
+        self._tracks_to_users = self._map_tracks_to_users(self._user_to_tracks)
+
+        super().__init__(all_tracks=list(self._tracks_to_users.keys()), embedding_size=embedding_size)
 
     @staticmethod
     def _map_users_to_tracks(all_users_tracks: List[List[int]]) -> Dict[int, List[int]]:
@@ -102,14 +125,18 @@ class DatasetGenerator:
                 tracks_to_users[track_id].append(user)
         return dict(tracks_to_users)
 
-    def generate_user_triples(
-            self,
-            all_users_tracks: List[List[int]],
-            batch_size: int
-    ) -> Iterable[Tuple[np.ndarray, np.ndarray, np.ndarray]]:
-        user_to_tracks = self._map_users_to_tracks(all_users_tracks)
-        tracks_to_users = self._map_tracks_to_users(user_to_tracks)
-        yield from self._generate_tracks_triples(group_id_to_tracks=user_to_tracks,
-                                                 tracks_to_group_id=tracks_to_users,
-                                                 batch_size=batch_size,
-                                                 description="Generating users triples: ")
+    def __next__(self):
+        current_anchor, current_positive, current_negative = None, None, None
+        while current_anchor is None:
+            current_anchor = next(self._all_tracks_iterator)
+            current_anchor, current_positive, current_negative = self._generate_single_triple(
+                anchor_track_id=current_anchor,
+                tracks_to_group_id=self._tracks_to_users,
+                group_id_to_tracks=self._user_to_tracks
+            )
+
+        anchor_np = np.array([current_anchor])
+        positive_np = np.array([current_positive])
+        negative_np = np.array([current_negative])
+
+        return [anchor_np, positive_np, negative_np], self._get_label()

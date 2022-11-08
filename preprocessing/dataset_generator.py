@@ -1,6 +1,6 @@
 import random
 from collections import defaultdict
-from typing import List, Iterable, Tuple, Dict, Union
+from typing import List, Iterable, Tuple, Dict, Union, Optional
 
 import numpy as np
 from tqdm import tqdm
@@ -21,22 +21,24 @@ class DatasetGenerator:
     def _get_positive(self,
                       track_id: int,
                       group_id: Union[int, List[int]],
-                      group_id_to_tracks: Dict[int, List[int]]) -> int:
+                      group_id_to_tracks: Dict[int, List[int]]) -> Optional[int]:
         current_positives = group_id_to_tracks[group_id] if isinstance(group_id, int) \
             else list(set(group_id_to_tracks[single_group_id] for single_group_id in group_id))
-        assert len(current_positives) > 1
-        return self._select_not_equal_value(track_id, current_positives)
+        selected_positive = None
+        if len(current_positives) > 1:
+            selected_positive = self._select_not_equal_value(track_id, current_positives)
+        return selected_positive
 
     def _get_negative(self,
                       group_id: Union[int, List[int]],
                       group_id_to_tracks: Dict[int, List[int]]) -> int:
         if isinstance(group_id, int):
-            current_negative_group_id = self._select_not_equal_value(group_id, group_id_to_tracks.keys())
+            current_negative_group_id = self._select_not_equal_value(group_id, list(group_id_to_tracks.keys()))
         else:
             negative_group_ids = set(group_id_to_tracks.keys()) - set(group_id)
             current_negative_group_id = random.choice(list(negative_group_ids))
         current_negative = group_id_to_tracks[current_negative_group_id]
-        assert len(current_negative) > 1
+        assert len(current_negative) > 0
         return random.choice(current_negative)
 
     def _generate_tracks_triples(self,
@@ -49,12 +51,17 @@ class DatasetGenerator:
 
         batch_anchors, batch_positives, batch_negatives = [], [], []
         for anchor_track_id in tqdm(all_tracks, desc=description):
-            batch_anchors.append(int(anchor_track_id))
-            batch_positives.append(int(self._get_positive(track_id=anchor_track_id,
-                                                          group_id=tracks_to_group_id[anchor_track_id],
-                                                          group_id_to_tracks=group_id_to_tracks)))
-            batch_negatives.append(int(self._get_negative(group_id=tracks_to_group_id[anchor_track_id],
-                                                          group_id_to_tracks=group_id_to_tracks)))
+            current_anchor = anchor_track_id
+            current_positive = self._get_positive(track_id=anchor_track_id,
+                                                  group_id=tracks_to_group_id[anchor_track_id],
+                                                  group_id_to_tracks=group_id_to_tracks)
+            current_negative = self._get_negative(group_id=tracks_to_group_id[anchor_track_id],
+                                                  group_id_to_tracks=group_id_to_tracks)
+            if current_positive is None:
+                continue
+            batch_anchors.append(int(current_anchor))
+            batch_positives.append(int(current_positive))
+            batch_negatives.append(int(current_negative))
             if len(batch_anchors) == batch_size:
                 yield np.array(batch_anchors), np.array(batch_positives), np.array(batch_negatives)
                 batch_anchors, batch_positives, batch_negatives = [], [], []

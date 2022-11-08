@@ -5,9 +5,9 @@ import gin
 import logging
 from typing import List
 
-from preprocessors.tracks_loader import WAVTracksLoader
-from preprocessors.tracks_feature_extractors import TracksFeatureExtractors
-from preprocessors.utils import get_train_val_tracks_ids, get_test_tracks_ids
+from exp.first_version.preprocessors.tracks_loader import WAVTracksLoader
+from exp.first_version.preprocessors.tracks_feature_extractors import TracksFeatureExtractors
+from exp.first_version.preprocessors import get_train_val_tracks_ids, get_test_tracks_ids
 logging.getLogger().setLevel(logging.INFO)
 
 

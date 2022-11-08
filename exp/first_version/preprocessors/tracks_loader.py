@@ -7,7 +7,7 @@ import yandex_music as ym
 from pydub import AudioSegment
 from tqdm import tqdm
 
-from preprocessors.utils import get_track_file_path
+from exp.first_version.preprocessors.utils import get_track_file_path
 
 
 @gin.configurable

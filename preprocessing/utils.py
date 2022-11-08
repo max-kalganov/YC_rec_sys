@@ -33,6 +33,10 @@ def str_to_int_dict(d: Dict[str, str]) -> Dict[int, int]:
     return {int(k): int(v) for k, v in d.items()}
 
 
+def str_to_int_list(outer_list: List[List[str]]) -> List[List[int]]:
+    return [[int(inner_list_value) for inner_list_value in inner_list] for inner_list in outer_list]
+
+
 @gin.configurable
 def get_train_val_tracks_ids(input_file_path: str,
                              train_val_split: float = 0.7) -> Tuple[List[List[str]], List[List[str]]]:

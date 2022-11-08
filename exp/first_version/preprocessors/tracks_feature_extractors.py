@@ -4,7 +4,7 @@ import librosa
 import pandas as pd
 import yandex_music as ym
 from exp.first_version.preprocessors.feature_extractors.abstract_feature_extractor import FeatureExtractor
-from exp.first_version.preprocessors.utils import get_track_file_path
+from preprocessing.utils import get_track_file_path
 
 
 @gin.configurable

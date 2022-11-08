@@ -1,0 +1,3 @@
+get_tracks_to_artists.input_file_path = "data/likes_data/track_artists.csv"
+run_artist_triples_dataset_generation.tracks_root_folder = ""
+run_artist_triples_dataset_generation.batch_size = 200000

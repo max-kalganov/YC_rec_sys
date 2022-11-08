@@ -11,10 +11,6 @@ def get_track_file_path(track_id: str, track_root_folder: str, user_ind: int, po
     return os.path.join(track_root_folder, file_name)
 
 
-def features_to_numpy():
-    pass
-
-
 def load_file_tracks(input_file_path: str) -> List[List[str]]:
     with open(input_file_path) as f:
         lines = f.readlines()

@@ -2,14 +2,12 @@ import gin
 import tensorflow as tf
 
 from models.utils import triplet_loss
-from preprocessing.dataset_generator import ArtistTriplesDatasetGenerator
-from preprocessing.utils import get_tracks_to_artists, str_to_int_dict
 
 
 @gin.configurable
 def get_artists_embed_model(embedding_size: int, max_track_id: int):
     embedding_model = tf.keras.models.Sequential([
-        tf.keras.layers.Embedding(max_track_id, embedding_size, name="Tracks embedding by artists layer")
+        tf.keras.layers.Embedding(max_track_id, embedding_size, name="tracks_embedding_by_artists_layer")
     ])
 
     embedding_model.summary()

@@ -25,4 +25,4 @@ if __name__ == '__main__':
 
     logging.info("\nStarting tracks embeddings training...")
     data_generator = get_artists_tracks_dataset_generator()
-    model = train_model()
+    model = train_model(data_generator=data_generator)

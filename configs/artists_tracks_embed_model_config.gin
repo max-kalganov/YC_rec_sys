@@ -1,7 +1,15 @@
-include "data/dataset_generation.gin"
+include 'configs/dataset_generation.gin'
+
+embedding_size = 5
 
 get_artists_embed_model.max_track_id = 483274
 
-get_artists_triple_loss_model.embedding_size =
+get_artists_triple_loss_model.embedding_size = %embedding_size
 
-ArtistTriplesDatasetGenerator.embedding_size =
+ArtistTriplesDatasetGenerator.embedding_size = %embedding_size
+
+triplet_loss.embedding_size = %embedding_size
+triplet_loss.alpha = 0.2
+
+train_model.epochs = 3
+train_model.batch_size = 100

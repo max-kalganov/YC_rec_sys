@@ -66,6 +66,9 @@ class BaseDatasetGenerator(abc.ABC):
     def _get_label(self):
         return np.zeros((1, 3 * self._embedding_size))
 
+    def __call__(self, *args, **kwargs):
+        return self
+
     def __iter__(self):
         return self
 

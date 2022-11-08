@@ -2,7 +2,7 @@ import abc
 import random
 from collections import defaultdict
 from copy import copy
-from itertools import cycle
+from itertools import cycle, chain
 from typing import List, Dict, Union, Optional
 
 import gin
@@ -29,7 +29,7 @@ class BaseDatasetGenerator(abc.ABC):
                       group_id: Union[int, List[int]],
                       group_id_to_tracks: Dict[int, List[int]]) -> Optional[int]:
         current_positives = group_id_to_tracks[group_id] if isinstance(group_id, int) \
-            else list(set(group_id_to_tracks[single_group_id] for single_group_id in group_id))
+            else list(set(chain(*[group_id_to_tracks[single_group_id] for single_group_id in group_id])))
         selected_positive = None
         if len(current_positives) > 1:
             selected_positive = self._select_not_equal_value(track_id, current_positives)

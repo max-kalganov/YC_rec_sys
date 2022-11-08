@@ -1,5 +1,5 @@
 import os
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 
 import gin
 
@@ -16,6 +16,21 @@ def load_file_tracks(input_file_path: str) -> List[List[str]]:
         lines = f.readlines()
         all_tracks = [user_tracks_str.strip().split(' ') for user_tracks_str in lines]
     return all_tracks
+
+
+@gin.configurable
+def get_tracks_to_artists(input_file_path: str) -> Dict[str, str]:
+    with open(input_file_path) as f:
+        lines = f.readlines()
+        tracks_to_artists = {}
+        for track_with_artist in lines[1:]:
+            track, artist = track_with_artist.split(',')
+            tracks_to_artists[track] = artist
+        return tracks_to_artists
+
+
+def str_to_int_dict(d: Dict[str, str]) -> Dict[int, int]:
+    return {int(k): int(v) for k, v in d.items()}
 
 
 @gin.configurable

@@ -105,7 +105,7 @@ class ArtistTriplesDatasetGenerator(BaseDatasetGenerator):
         positive_np = np.array([current_positive])
         negative_np = np.array([current_negative])
 
-        return [anchor_np, positive_np, negative_np], self._get_label()
+        return (anchor_np, positive_np, negative_np), self._get_label()
 
 
 @gin.configurable
@@ -142,4 +142,4 @@ class UsersTriplesDatasetGenerator(BaseDatasetGenerator):
         positive_np = np.array([current_positive])
         negative_np = np.array([current_negative])
 
-        return [anchor_np, positive_np, negative_np], self._get_label()
+        return (anchor_np, positive_np, negative_np), self._get_label()

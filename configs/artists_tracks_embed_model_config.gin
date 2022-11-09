@@ -1,8 +1,9 @@
 include 'configs/dataset_generation.gin'
 
 embedding_size = 5
+max_track_id = 483274
 
-get_artists_embed_model.max_track_id = 483274
+get_artists_embed_model.max_track_id = %max_track_id
 
 get_artists_triple_loss_model.embedding_size = %embedding_size
 
@@ -16,10 +17,16 @@ triplet_neg_dist.embedding_size = %embedding_size
 triplet_pos_neg_compare.embedding_size = %embedding_size
 
 get_tensorboard_callback.log_dir = "data/logs/artists_track_embed_logs"
-get_tensorboard_callback.experiment_name = "bs_1000_spe_483_e_3_exp2"
+get_tensorboard_callback.experiment_name = "bs_1000_spe_483_e_200_exp2"
 
 train_model.epochs = 200
 train_model.batch_size = 1000
 train_model.steps_per_epoch = 483
+train_model.continue_from_loaded_model = True
 
-save_model.save_dir = "data/models/artists_track_embed_logs_exp2.h5"
+save_model.save_dir = "data/models/artists_track_embed_logs_exp2_1.h5"
+load_model.load_dir = "data/models/artists_track_embed_logs_exp2.h5"
+
+
+dump_embeddings.log_dir = "data/logs/artists_track_embed_logs/bs_1000_spe_483_e_200_exp2/embeddings_log"
+dump_embeddings.max_track_id = %max_track_id

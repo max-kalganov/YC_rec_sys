@@ -1,3 +1,5 @@
+from typing import Optional
+
 import gin
 import tensorflow as tf
 
@@ -35,8 +37,11 @@ def get_artists_triple_loss_model(embedding_size: int):
 
 
 @gin.configurable
-def train_model(epochs, batch_size, steps_per_epoch, data_generator):
-    model = get_artists_triple_loss_model()
+def train_model(epochs, batch_size, steps_per_epoch, data_generator, continue_from_loaded_model: bool = False):
+    if continue_from_loaded_model:
+        model = load_model()
+    else:
+        model = get_artists_triple_loss_model()
 
     model.compile(optimizer='adam', loss=triplet_loss, metrics=[triplet_pos_dist,
                                                                 triplet_neg_dist,
@@ -51,3 +56,11 @@ def train_model(epochs, batch_size, steps_per_epoch, data_generator):
 @gin.configurable
 def save_model(model, save_dir: str):
     model.save(save_dir)
+
+
+@gin.configurable
+def load_model(load_dir: str):
+    return tf.keras.models.load_model(load_dir, custom_objects={'triplet_loss': triplet_loss,
+                                                                'triplet_pos_dist': triplet_pos_dist,
+                                                                'triplet_neg_dist': triplet_neg_dist,
+                                                                'triplet_pos_neg_compare': triplet_pos_neg_compare})

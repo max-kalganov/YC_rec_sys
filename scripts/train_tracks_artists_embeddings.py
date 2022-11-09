@@ -16,7 +16,14 @@ def get_artists_tracks_dataset_generator():
 
     dataset_generator = ArtistTriplesDatasetGenerator(tracks_to_artists)
 
-    dataset = tf.data.Dataset.from_generator(dataset_generator, output_types=((tf.int8, tf.int8, tf.int8), tf.float64))
+    types = ((tf.int8, tf.int8, tf.int8), tf.float32)
+    shapes = (([None, ], [None, ], [None, ]), [None, 15])
+
+    dataset = tf.data.Dataset.from_generator(
+        dataset_generator,
+        output_types=types,
+        output_shapes=shapes
+    )
     return dataset
 
 

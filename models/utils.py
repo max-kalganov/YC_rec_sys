@@ -1,3 +1,5 @@
+import os.path
+
 import gin
 import tensorflow as tf
 
@@ -43,6 +45,7 @@ def triplet_pos_neg_compare(y_true, y_pred, embedding_size):
 
 
 @gin.configurable
-def get_tensorboard_callback(log_dir):
+def get_tensorboard_callback(log_dir, experiment_name: str):
+    log_dir = os.path.join(log_dir, experiment_name)
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
     return tensorboard_callback

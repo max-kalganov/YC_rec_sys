@@ -11,5 +11,11 @@ ArtistTriplesDatasetGenerator.embedding_size = %embedding_size
 triplet_loss.embedding_size = %embedding_size
 triplet_loss.alpha = 0.2
 
-train_model.epochs = 3
-train_model.batch_size = 100
+triplet_pos_dist.embedding_size = %embedding_size
+triplet_neg_dist.embedding_size = %embedding_size
+triplet_pos_neg_compare.embedding_size = %embedding_size
+
+get_tensorboard_callback.log_dir = "data/logs/artists_track_embed_logs"
+
+train_model.epochs = 2
+train_model.batch_size = 100000

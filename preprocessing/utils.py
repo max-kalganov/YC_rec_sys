@@ -24,7 +24,7 @@ def get_tracks_to_artists(input_file_path: str) -> Dict[str, str]:
         lines = f.readlines()
         tracks_to_artists = {}
         for track_with_artist in lines[1:]:
-            track, artist = track_with_artist.split(',')
+            track, artist = track_with_artist.strip().split(',')
             tracks_to_artists[track] = artist
         return tracks_to_artists
 

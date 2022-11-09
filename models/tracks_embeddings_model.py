@@ -1,7 +1,8 @@
 import gin
 import tensorflow as tf
 
-from models.utils import triplet_loss
+from models.utils import triplet_loss, triplet_pos_dist, triplet_pos_neg_compare, triplet_neg_dist, \
+    get_tensorboard_callback
 
 
 @gin.configurable
@@ -37,6 +38,10 @@ def get_artists_triple_loss_model(embedding_size: int):
 def train_model(epochs, batch_size, data_generator):
     model = get_artists_triple_loss_model()
 
-    model.compile(optimizer='adam', loss=triplet_loss)
-    model.fit(data_generator, batch_size=batch_size, epochs=epochs)
+    model.compile(optimizer='adam', loss=triplet_loss, metrics=[triplet_pos_dist,
+                                                                triplet_neg_dist,
+                                                                triplet_pos_neg_compare])
+
+    tensorboard_callback = get_tensorboard_callback()
+    model.fit(data_generator, batch_size=batch_size, epochs=epochs, steps_per_epoch=3, callbacks=[tensorboard_callback])
     return model

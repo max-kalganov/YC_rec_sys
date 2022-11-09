@@ -35,7 +35,7 @@ def get_artists_triple_loss_model(embedding_size: int):
 
 
 @gin.configurable
-def train_model(epochs, batch_size, data_generator):
+def train_model(epochs, batch_size, steps_per_epoch, data_generator):
     model = get_artists_triple_loss_model()
 
     model.compile(optimizer='adam', loss=triplet_loss, metrics=[triplet_pos_dist,
@@ -43,5 +43,11 @@ def train_model(epochs, batch_size, data_generator):
                                                                 triplet_pos_neg_compare])
 
     tensorboard_callback = get_tensorboard_callback()
-    model.fit(data_generator, batch_size=batch_size, epochs=epochs, steps_per_epoch=3, callbacks=[tensorboard_callback])
+    model.fit(data_generator, batch_size=batch_size, epochs=epochs, steps_per_epoch=steps_per_epoch,
+              callbacks=[tensorboard_callback])
     return model
+
+
+@gin.configurable
+def save_model(model, save_dir: str):
+    model.save(save_dir)

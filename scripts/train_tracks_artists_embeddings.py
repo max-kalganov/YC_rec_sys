@@ -1,7 +1,7 @@
 import gin
 import logging
 
-from models.tracks_embeddings_model import train_model
+from models.tracks_embeddings_model import train_model, save_model
 import tensorflow as tf
 
 from preprocessing.dataset_generator import ArtistTriplesDatasetGenerator
@@ -33,3 +33,6 @@ if __name__ == '__main__':
     logging.info("\nStarting tracks embeddings training...")
     data_generator = get_artists_tracks_dataset_generator()
     model = train_model(data_generator=data_generator)
+    save_model(model)
+
+

@@ -20,8 +20,10 @@ def download_test_data():
     return test
 
 
-def get_popular_tracks(track_stats):
-    popular_tracks = sorted(track_stats.items(), key=lambda item: item[1], reverse=True)[:100]
+def get_popular_tracks(track_stats, top100: bool = True):
+    popular_tracks = sorted(track_stats.items(), key=lambda item: item[1], reverse=True)
+    if top100:
+        popular_tracks = popular_tracks[:100]
     popular_tracks_list = [x[0] for x in popular_tracks]
     return popular_tracks_list
 

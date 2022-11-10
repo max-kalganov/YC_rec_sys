@@ -6,7 +6,7 @@ from pydub import AudioSegment
 
 def get_track_file_path(track_id: str, postfix: str = None):
     postfix = f"_{postfix}" if postfix else ""
-    path = os.path.join('../data', 'tracks', f"{track_id}{postfix}.mp3")
+    path = os.path.join('data', 'tracks', f"{track_id}{postfix}.mp3")
     os.makedirs(os.path.dirname(path), exist_ok=True)
     return path
 

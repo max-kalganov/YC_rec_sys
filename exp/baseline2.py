@@ -9,7 +9,7 @@ from exp.improved_baseline import aggregate_track_stats, get_popular_tracks, wri
 
 def store_all_users_tracks():
     users_tracks = []
-    with open('../data/likes_data/train') as f:
+    with open('data/likes_data/train') as f:
         lines = f.readlines()
         for line in lines:
             users_tracks.append(set(line.strip().split(' ')))
@@ -28,7 +28,7 @@ def get_predictions(train_users_tracks: List[Set[str]], train_100_popular_tracks
                     tracks_to_users_map: Dict[str, Set[str]], n_most_common_tracks: int = 20,
                     n_most_common_nearest_users: int = 3):
     results = []
-    with open('../data/likes_data/test') as f:
+    with open('data/likes_data/test') as f:
         lines = f.readlines()
 
         for line in tqdm(lines):

@@ -9,7 +9,7 @@ from exp.improved_baseline import aggregate_track_stats, get_popular_tracks, wri
 
 def store_all_users_tracks():
     users_tracks = []
-    with open('../data/likes_data/train') as f:
+    with open('data/likes_data/train') as f:
         lines = f.readlines()
         for line in lines:
             users_tracks.append(list(line.strip().split(' ')))
@@ -18,7 +18,7 @@ def store_all_users_tracks():
 
 def store_test_users_tracks():
     users_tracks = []
-    with open('../data/likes_data/test') as f:
+    with open('data/likes_data/test') as f:
         lines = f.readlines()
         for line in lines:
             users_tracks.append(list(line.strip().split(' ')))
@@ -90,7 +90,7 @@ def run_baseline3():
 
 def crop_results():
     cropped_results = []
-    with open('../data/results/baseline3_results') as f:
+    with open('data/results/baseline3_results') as f:
         lines = f.readlines()
         for line in lines:
             cropped_line = ' '.join(line.strip().split(' ')[:100]) + '\n'

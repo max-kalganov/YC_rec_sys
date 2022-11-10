@@ -1,8 +1,8 @@
-def aggregate_track_stats():
+def aggregate_track_stats(file: str = 'data/likes_data/train'):
     track_stats = {}
 
-    print("process train data")
-    with open('../data/likes_data/train') as f:
+    print(f"process {file} data")
+    with open(file) as f:
         lines = f.readlines()
         for line in lines:
             tracks = line.strip().split(' ')
@@ -15,7 +15,7 @@ def aggregate_track_stats():
 
 def download_test_data():
     print("process test data")
-    with open('../data/likes_data/test') as f:
+    with open('data/likes_data/test') as f:
         test = f.readlines()
     return test
 
@@ -46,7 +46,7 @@ def get_global_track_score(track_stats):
 def get_filtered_train_track_count(top_tracks_set):
     print("calc score continue")
     track_count = {}
-    with open('../data/likes_data/train') as f:
+    with open('data/likes_data/train') as f:
         lines = f.readlines()
         for (i, line) in enumerate(lines):
             tracks = line.strip().split(' ')
@@ -93,7 +93,7 @@ def get_test_results(test, track_count, global_track_score, popular_tracks_list)
 
 def write_results(result, filename: str):
     print("dump results")
-    with open(f'../data/results/{filename}', 'w') as f:
+    with open(f'data/results/{filename}', 'w') as f:
         f.writelines(result)
 
 

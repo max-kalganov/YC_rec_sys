@@ -1,7 +1,7 @@
 track_stats = {}
 
 print("process train data")
-with open('../data/likes_data/train') as f:
+with open('data/likes_data/train') as f:
     lines = f.readlines()
     for line in lines:
         tracks = line.strip().split(' ')
@@ -11,7 +11,7 @@ with open('../data/likes_data/train') as f:
             track_stats[track] += 1
 
 print("process test data")
-with open('../data/likes_data/test') as f:
+with open('data/likes_data/test') as f:
     test = f.readlines()
 
 popular_tracks = sorted(track_stats.items(), key=lambda item: item[1], reverse=True)[:100]
@@ -27,7 +27,7 @@ for track in top_tracks:
 
 print("calc score continue")
 track_count = {}
-with open('../data/likes_data/train') as f:
+with open('data/likes_data/train') as f:
     lines = f.readlines()
     for (i, line) in enumerate(lines):
         tracks = line.strip().split(' ')
@@ -69,5 +69,5 @@ for query in test:
 
 
 print("dump results")
-with open('../data/results/baseline_result', 'w') as f:
+with open('data/results/baseline_result', 'w') as f:
     f.writelines(result)

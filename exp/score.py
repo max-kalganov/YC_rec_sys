@@ -21,4 +21,4 @@ def calc_score(target_path, predict_path):
 
     print("MRR@100 = {}".format(mrr_score / len(y_true)))
 
-calc_score("true_answers.csv", "../data/results/baseline_result")
+calc_score("true_answers.csv", "data/results/baseline_result")

@@ -100,6 +100,7 @@ class TracksToUsersStorage(StatsStorage):
         self._mapped_users_name = mapped_users_name
 
     def get_all_users_lists(self):
+        logging.debug(f"{self.name}: Getting all users lists")
         all_users_datasets = [self._key_to_load_map[key_name]() for key_name in self._mapped_users_name]
         all_users_lists = chain(*all_users_datasets)
         return list(all_users_lists)
@@ -117,10 +118,12 @@ class TracksToUsersStorage(StatsStorage):
 
     def load(self):
         if os.path.exists(self.file_path):
+            logging.info(f"{self.name}: Loading from {self.file_path}")
             lines = self.load_lines_from_file(self.file_path)
             tracks_to_users = self._list_of_str_to_dict(lines)
             all_users_lists = self.get_all_users_lists()
         else:
+            logging.info(f"{self.name}: Calculating and dumping into {self.file_path}")
             tracks_to_users, all_users_lists = self.calculate_and_dump()
         return tracks_to_users, all_users_lists
 
@@ -155,10 +158,12 @@ class NearestUsersStorage(StatsStorage):
 
     def load(self):
         if os.path.exists(self.file_path):
+            logging.info(f"{self.name}: Loading from {self.file_path}")
             lines = self.load_lines_from_file(self.file_path)
             nearest_users = self._list_of_str_to_list_of_lists(lines)
             all_users_lists = self.track_to_users_loader.get_all_users_lists()
         else:
+            logging.info(f"{self.name}: Calculating and dumping into {self.file_path}")
             nearest_users, all_users_lists = self.calculate_and_dump()
         return nearest_users, all_users_lists
 
@@ -195,8 +200,10 @@ class PopularTracksStorage(StatsStorage):
 
     def load(self):
         if os.path.exists(self.file_path):
+            logging.info(f"{self.name}: Loading from {self.file_path}")
             lines = self.load_lines_from_file(self.file_path)
             pop_tracks = self._format_pop_tracks(lines)
         else:
+            logging.info(f"{self.name}: Calculating and dumping into {self.file_path}")
             pop_tracks = self.calculate_and_dump()
         return pop_tracks

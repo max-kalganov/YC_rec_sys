@@ -38,10 +38,10 @@ def get_predictions(train_users_tracks: List[Set[str]], train_100_popular_tracks
             for track in current_test_user_tracks:
                 nearest_train_users.update(tracks_to_users_map[track])
 
-            top3_nearest_train_users = [user_id for user_id, _ in nearest_train_users.most_common(n_most_common_nearest_users)]
+            top_nearest_users = [user_id for user_id, _ in nearest_train_users.most_common(n_most_common_nearest_users)]
 
             new_top3_users_tracks = Counter()
-            for nearest_user in top3_nearest_train_users:
+            for nearest_user in top_nearest_users:
                 new_top3_users_tracks.update(train_users_tracks[nearest_user] - current_test_user_tracks)
 
             most_common_tracks = new_top3_users_tracks.most_common(n_most_common_tracks)
@@ -71,8 +71,8 @@ def run_baseline2():
     t3 = time.time()
     print("Time: ", t3 - t2)
     results = get_predictions(train_users_tracks, train_100_popular_tracks,
-                              tracks_to_users_map, n_most_common_tracks=20, n_most_common_nearest_users=10)
-    write_results(results, "improved_baseline_result_20_most_common_10_nearest_users")
+                              tracks_to_users_map, n_most_common_tracks=100, n_most_common_nearest_users=1)
+    write_results(results, "improved_baseline_result_100_most_common_1_nearest_users")
 
     t4 = time.time()
     print(t4 - t3)

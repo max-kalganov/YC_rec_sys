@@ -2,6 +2,7 @@ import abc
 import logging
 import os.path
 from collections import Counter, defaultdict
+from itertools import chain
 from typing import List, Dict, Any, Union, Iterable
 
 from tqdm import tqdm
@@ -98,26 +99,30 @@ class TracksToUsersStorage(StatsStorage):
                          file_name=f"tracks_to_users_storage_{'|'.join(mapped_users_name)}")
         self._mapped_users_name = mapped_users_name
 
-    def calculate_and_dump(self, *args, **kwargs):
-        all_users_lists = [self._key_to_load_map[key_name]() for key_name in self._mapped_users_name]
-        tracks_to_users = defaultdict(list)
+    def get_all_users_lists(self):
+        all_users_datasets = [self._key_to_load_map[key_name]() for key_name in self._mapped_users_name]
+        all_users_lists = chain(*all_users_datasets)
+        return list(all_users_lists)
 
-        for users_tracks in all_users_lists:
-            for i, user_tracks in enumerate(users_tracks):
-                for track in user_tracks:
-                    tracks_to_users[track].append(i)
+    def calculate_and_dump(self, *args, **kwargs):
+        tracks_to_users = defaultdict(list)
+        all_users_lists = self.get_all_users_lists()
+        for i, single_user_tracks in tqdm(enumerate(all_users_lists), desc=f"{self.name} running: "):
+            for track in single_user_tracks:
+                tracks_to_users[track].append(i)
 
         lines = self._dict_to_list_of_str(tracks_to_users)
         self.dump_lines_in_file(lines)
-        return tracks_to_users
+        return tracks_to_users, all_users_lists
 
     def load(self):
         if os.path.exists(self.file_path):
             lines = self.load_lines_from_file(self.file_path)
             tracks_to_users = self._list_of_str_to_dict(lines)
+            all_users_lists = self.get_all_users_lists()
         else:
-            tracks_to_users = self.calculate_and_dump()
-        return tracks_to_users
+            tracks_to_users, all_users_lists = self.calculate_and_dump()
+        return tracks_to_users, all_users_lists
 
 
 class NearestUsersStorage(StatsStorage):
@@ -129,13 +134,14 @@ class NearestUsersStorage(StatsStorage):
                          file_name=f"nearest_users_storage_{key_users_name};{'|'.join(to_be_sorted_users_name)}")
         self._key_user = key_users_name
         self._to_be_sorted_users = to_be_sorted_users_name
+        self.track_to_users_loader = TracksToUsersStorage(mapped_users_name=self._to_be_sorted_users)
 
     def calculate_and_dump(self, *args, **kwargs):
         key_users = self._key_to_load_map[self._key_user]()
-        tracks_to_users = TracksToUsersStorage(mapped_users_name=self._to_be_sorted_users).load()
+        tracks_to_users, all_users_lists = self.track_to_users_loader.load()
 
         all_nearest_users = []
-        for single_user_tracks in tqdm(key_users):
+        for single_user_tracks in tqdm(key_users, desc=f"{self.name} running: "):
             nearest_users = Counter()
             for track in single_user_tracks:
                 nearest_users.update(tracks_to_users[track])
@@ -145,15 +151,16 @@ class NearestUsersStorage(StatsStorage):
 
         formatted_nearest_users = self._list_of_lists_to_list_of_str(all_nearest_users)
         self.dump_lines_in_file(formatted_nearest_users)
-        return all_nearest_users
+        return all_nearest_users, all_users_lists
 
     def load(self):
         if os.path.exists(self.file_path):
             lines = self.load_lines_from_file(self.file_path)
             nearest_users = self._list_of_str_to_list_of_lists(lines)
+            all_users_lists = self.track_to_users_loader.get_all_users_lists()
         else:
-            nearest_users = self.calculate_and_dump()
-        return nearest_users
+            nearest_users, all_users_lists = self.calculate_and_dump()
+        return nearest_users, all_users_lists
 
 
 class PopularTracksStorage(StatsStorage):
@@ -175,8 +182,8 @@ class PopularTracksStorage(StatsStorage):
         datasets_users = [self._key_to_load_map[user]() for user in self._users_to_process]
 
         tracks_stats = Counter()
-        for users_tracks in datasets_users:
-            for single_user_tracks in users_tracks:
+        for users_tracks, users_tracks_name in zip(datasets_users, self._users_to_process):
+            for single_user_tracks in tqdm(users_tracks, desc=f"{self.name} running ({users_tracks_name}): "):
                 tracks_stats.update(single_user_tracks)
 
         popular_tracks = [track for track, popularity in tracks_stats.most_common()]

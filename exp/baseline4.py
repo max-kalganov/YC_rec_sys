@@ -1,3 +1,4 @@
+import pickle
 from collections import Counter, defaultdict
 from itertools import chain
 from typing import Dict, List, Tuple
@@ -7,6 +8,18 @@ from tqdm import tqdm
 
 from preprocessing.utils import load_file_tracks, get_tracks_to_artists
 from exp import constants as ct
+
+
+def dumper(data, file):
+    # open a file, where you ant to store the data
+    with open(file, 'wb') as f:
+        pickle.dump(data, file)
+
+
+def loader(file):
+    with open(file, 'rb') as f:
+        data = pickle.load(f)
+    return data
 
 
 def calc_prediction():

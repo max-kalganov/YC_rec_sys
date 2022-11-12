@@ -8,5 +8,5 @@ ALL_KEYS = {TRAIN_KEY, TEST_KEY, TRACKS_TO_ARTISTS_KEY}
 KEY_TO_FILENAME = {
     TRAIN_KEY: "data/likes_data/train",
     TEST_KEY: "data/likes_data/test",
-    TRACKS_TO_ARTISTS_KEY: "data/likes/track_artists.csv"
+    TRACKS_TO_ARTISTS_KEY: "data/likes_data/track_artists.csv"
 }

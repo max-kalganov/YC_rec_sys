@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 import exp.constants as cnst
 from preprocessing.utils import load_file_tracks, get_tracks_to_artists
-
+from plotly.express import box
 
 class StatsStorage(abc.ABC):
     def __init__(self, name: str = "StatsStorage", file_name: str = "stats_storage_tempo", storage_root_dir: str = "data/stats"):

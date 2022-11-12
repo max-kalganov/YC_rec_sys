@@ -143,29 +143,31 @@ class NearestUsersStorage(StatsStorage):
         key_users = self._key_to_load_map[self._key_user]()
         tracks_to_users, all_users_lists = self.track_to_users_loader.load()
 
-        all_nearest_users = []
-        for single_user_tracks in tqdm(key_users, desc=f"{self.name} running: "):
-            nearest_users = Counter()
-            for track in single_user_tracks:
-                nearest_users.update(tracks_to_users[track])
+        with open(self.file_path, "w") as f:
+            for single_user_tracks in tqdm(key_users, desc=f"{self.name} running: "):
+                nearest_users = Counter()
+                for track in single_user_tracks:
+                    nearest_users.update(tracks_to_users[track])
 
-            current_user_nearest = [user_id for user_id, intersection in nearest_users.most_common() if intersection > 0]
-            all_nearest_users.append(current_user_nearest)
+                current_user_nearest = [f"{user_id}|{intersection}" for user_id, intersection in nearest_users.most_common() if intersection > 3]
+                current_user_nearest_str = ' '.join(current_user_nearest) + '\n'
+                f.write(current_user_nearest_str)
 
-        formatted_nearest_users = self._list_of_lists_to_list_of_str(all_nearest_users)
-        self.dump_lines_in_file(formatted_nearest_users)
-        return all_nearest_users, all_users_lists
+        # formatted_nearest_users = self._list_of_lists_to_list_of_str(all_nearest_users)
+        # self.dump_lines_in_file(formatted_nearest_users)
+        return all_users_lists
 
     def load(self):
+        raise NotImplemented("implement selecting number of nearest users")
         if os.path.exists(self.file_path):
             logging.info(f"{self.name}: Loading from {self.file_path}")
             lines = self.load_lines_from_file(self.file_path)
-            nearest_users = self._list_of_str_to_list_of_lists(lines)
+            nearest_users_with_intersec = self._list_of_str_to_list_of_lists(lines)
             all_users_lists = self.track_to_users_loader.get_all_users_lists()
         else:
             logging.info(f"{self.name}: Calculating and dumping into {self.file_path}")
-            nearest_users, all_users_lists = self.calculate_and_dump()
-        return nearest_users, all_users_lists
+            nearest_users_with_intersec, all_users_lists = self.calculate_and_dump()
+        return nearest_users_with_intersec, all_users_lists
 
 
 class PopularTracksStorage(StatsStorage):

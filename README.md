@@ -28,6 +28,17 @@ possible track ids as next `liked` track id for the corresponding
 user in the same line in **test file**.
 
 ## Suggested solution
+### See in `exp` folder... (baseline_4)
+Calculate statistics for the nearest users tracks / the nearest
+users aritsts, etc. Trying to predict next liked track. 
+One of the ideas is to get mean tracks popularity over all
+users and sort prediction tracks for each user with the following key:
+```commandline
+(sum_of_user_tracks_popularity + current_prediction_track)/(num_of_user_tracks + 1) - dataset_mean_users_tracks_popularity
+```
+
+
+## Didn't have enough time to implement and debug the following solution:
 
 ### Dataset
 2 datasets:
